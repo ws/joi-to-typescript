@@ -404,7 +404,11 @@ function parseAlternatives(details: AlternativesDescribe, settings: Settings): T
   const { interfaceOrTypeName, jsDoc } = getCommonDetails(details, settings);
   const ignoreLabels = interfaceOrTypeName ? [interfaceOrTypeName] : [];
   const children = filterMap(details.matches, match => {
-    return parseSchema(match.schema, settings, true, ignoreLabels);
+    // hackily patched to avoid blowing up when it comes across an alternative with a .ref()
+    // may introduce other bugs
+    // definitely does not generate a logical TS type based on the ref values
+    if(match.schema) return parseSchema(match.schema, settings, true, ignoreLabels);
+    return undefined;
   });
   // This is an check that cannot be tested as Joi throws an error before this package
   // can be called, there is test for it in alternatives
